@@ -6,6 +6,8 @@ import {
   Dimensions,
   Pressable,
   StyleSheet,
+  Animated,
+  StatusBar,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -16,23 +18,30 @@ const PAGES = [
   {
     title: "Trade clothes, not money",
     subtitle:
-      "Exchange fashion items with people near you — instantly and fairly.",
+      "Exchange fashion pieces with people near you. Fair, fast and transparent swaps.",
   },
   {
     title: "Smart swaps",
     subtitle:
-      "We match your clothes with the best nearby swaps using style, size and value.",
+      "We intelligently match your clothes with nearby users based on style, size and value.",
   },
   {
     title: "Sustainable by design",
-    subtitle: "Reduce waste and refresh your wardrobe without buying more.",
+    subtitle:
+      "Refresh your wardrobe without buying more — and help reduce fashion waste.",
   },
 ];
 
 export default function Onboarding() {
   const router = useRouter();
   const listRef = useRef<FlatList>(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
   const [page, setPage] = useState(0);
+
+  const finish = async () => {
+    await AsyncStorage.setItem("@onboarding_seen", "true");
+    router.replace("/login");
+  };
 
   const onNext = async () => {
     if (page < PAGES.length - 1) {
@@ -41,48 +50,113 @@ export default function Onboarding() {
         animated: true,
       });
     } else {
-      await AsyncStorage.setItem("@onboarding_seen", "true");
-      router.replace("/login");
+      finish();
     }
   };
 
   return (
     <View style={styles.container}>
-      <FlatList
+      <StatusBar barStyle="dark-content" />
+
+      {/* Skip */}
+      <Pressable onPress={finish} style={styles.skip}>
+        <Text style={styles.skipText}>Skip</Text>
+      </Pressable>
+
+      <Animated.FlatList
         ref={listRef}
         data={PAGES}
         keyExtractor={(_, i) => i.toString()}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        bounces={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false },
+        )}
         onMomentumScrollEnd={(e) => {
           const index = Math.round(e.nativeEvent.contentOffset.x / width);
           setPage(index);
         }}
-        renderItem={({ item }) => (
-          <View style={[styles.page, { width }]}>
-            <View style={styles.center}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.subtitle}>{item.subtitle}</Text>
+        renderItem={({ item, index }) => {
+          const inputRange = [
+            (index - 1) * width,
+            index * width,
+            (index + 1) * width,
+          ];
+
+          const translateY = scrollX.interpolate({
+            inputRange,
+            outputRange: [30, 0, 30],
+          });
+
+          const opacity = scrollX.interpolate({
+            inputRange,
+            outputRange: [0.3, 1, 0.3],
+          });
+
+          return (
+            <View style={[styles.page, { width }]}>
+              {/* Visual block */}
+              <View style={styles.hero}>
+                <View style={styles.fakeCard} />
+                <View style={[styles.fakeCard, styles.fakeCardOffset]} />
+              </View>
+
+              <Animated.View
+                style={[
+                  styles.textBlock,
+                  {
+                    transform: [{ translateY }],
+                    opacity,
+                  },
+                ]}
+              >
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.subtitle}>{item.subtitle}</Text>
+              </Animated.View>
             </View>
-          </View>
-        )}
+          );
+        }}
       />
 
-      {/* footer */}
+      {/* Footer */}
       <View style={styles.footer}>
-        <View style={styles.dots}>
-          {PAGES.map((_, i) => (
-            <View
-              key={i}
-              style={[styles.dot, i === page && styles.dotActive]}
-            />
-          ))}
+        <View style={styles.progress}>
+          {PAGES.map((_, i) => {
+            const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
+
+            const scale = scrollX.interpolate({
+              inputRange,
+              outputRange: [1, 1.8, 1],
+              extrapolate: "clamp",
+            });
+
+            const opacity = scrollX.interpolate({
+              inputRange,
+              outputRange: [0.3, 1, 0.3],
+              extrapolate: "clamp",
+            });
+
+            return (
+              <Animated.View
+                key={i}
+                style={[
+                  styles.dot,
+                  {
+                    transform: [{ scaleX: scale }],
+                    opacity,
+                  },
+                ]}
+              />
+            );
+          })}
         </View>
 
-        <Pressable onPress={onNext} style={styles.button}>
+        <Pressable style={styles.button} onPress={onNext}>
           <Text style={styles.buttonText}>
-            {page === PAGES.length - 1 ? "Continue" : "Next"}
+            {page === PAGES.length - 1 ? "Start swapping" : "Continue"}
           </Text>
         </Pressable>
       </View>
@@ -96,21 +170,55 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 
+  skip: {
+    position: "absolute",
+    right: 24,
+    top: 56,
+    zIndex: 10,
+  },
+
+  skipText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+
   page: {
     flex: 1,
-    paddingHorizontal: 32,
+    paddingHorizontal: 28,
     justifyContent: "center",
   },
 
-  center: {
-    marginBottom: 120,
+  hero: {
+    height: 260,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 36,
+  },
+
+  fakeCard: {
+    position: "absolute",
+    width: 180,
+    height: 240,
+    borderRadius: 24,
+    backgroundColor: "#F3F4F6",
+  },
+
+  fakeCardOffset: {
+    transform: [{ rotate: "-6deg" }, { translateX: -18 }],
+    backgroundColor: "#E5E7EB",
+  },
+
+  textBlock: {
+    maxWidth: 320,
   },
 
   title: {
     fontSize: 34,
     fontWeight: "600",
+    letterSpacing: -0.4,
     color: "#111",
-    marginBottom: 12,
+    marginBottom: 14,
   },
 
   subtitle: {
@@ -123,31 +231,26 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 32,
-    paddingHorizontal: 32,
+    bottom: 36,
+    paddingHorizontal: 28,
   },
 
-  dots: {
+  progress: {
     flexDirection: "row",
-    marginBottom: 24,
+    marginBottom: 22,
   },
 
   dot: {
-    width: 6,
     height: 6,
+    width: 8,
     borderRadius: 3,
-    backgroundColor: "#E5E7EB",
-    marginRight: 6,
-  },
-
-  dotActive: {
     backgroundColor: "#111",
-    width: 18,
+    marginRight: 8,
   },
 
   button: {
-    height: 52,
-    borderRadius: 14,
+    height: 54,
+    borderRadius: 16,
     backgroundColor: "#111",
     alignItems: "center",
     justifyContent: "center",
@@ -155,7 +258,8 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 15,
+    fontWeight: "600",
+    letterSpacing: 0.2,
   },
 });

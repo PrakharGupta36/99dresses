@@ -16,16 +16,26 @@ export function useUserProfile() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
+    let unsubscribeDoc: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      // cleanup old listener when user changes
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = null;
+      }
+
       if (!user) {
         setProfile(null);
         setLoading(false);
         return;
       }
 
+      setLoading(true);
+
       const ref = doc(db, "users", user.uid);
 
-      const unsubDoc = onSnapshot(ref, (snap) => {
+      unsubscribeDoc = onSnapshot(ref, (snap) => {
         if (snap.exists()) {
           setProfile(snap.data() as UserProfile);
         } else {
@@ -34,11 +44,12 @@ export function useUserProfile() {
 
         setLoading(false);
       });
-
-      return unsubDoc;
     });
 
-    return () => unsubAuth();
+    return () => {
+      if (unsubscribeDoc) unsubscribeDoc();
+      unsubscribeAuth();
+    };
   }, []);
 
   return { profile, loading };

@@ -38,6 +38,11 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.root}>
+      {/* Top title */}
+      <View style={styles.topBar}>
+        <Text style={styles.topTitle}>Profile</Text>
+      </View>
+
       <View style={styles.header}>
         {profile.photo ? (
           <Image source={{ uri: profile.photo }} style={styles.avatar} />
@@ -51,6 +56,11 @@ export default function ProfileScreen() {
 
         <Text style={styles.name}>{profile.name}</Text>
         <Text style={styles.email}>{profile.email}</Text>
+
+        {/* Edit profile (future action) */}
+        <Pressable style={styles.editButton}>
+          <Text style={styles.editText}>Edit profile</Text>
+        </Pressable>
       </View>
 
       <View style={styles.section}>
@@ -82,9 +92,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
+  topBar: {
+    paddingTop: 48,
+    paddingBottom: 12,
+  },
+
+  topTitle: {
+    fontSize: 28,
+    fontWeight: "600",
+    letterSpacing: -0.3,
+    color: "#111",
+  },
+
   header: {
     alignItems: "center",
-    marginTop: 40,
+    marginTop: 24,
     marginBottom: 48,
   },
 
@@ -121,6 +143,23 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 14,
     color: "#6B7280",
+  },
+
+  editButton: {
+    marginTop: 16,
+    paddingHorizontal: 18,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  editText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#111",
   },
 
   section: {
