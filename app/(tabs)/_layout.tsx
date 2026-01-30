@@ -1,6 +1,7 @@
-import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform } from "react-native";
+import { BlurView } from "expo-blur";
+import { Tabs } from "expo-router";
+import { Platform, StyleSheet, View } from "react-native";
 
 const ACTIVE = "#111";
 const INACTIVE = "#9CA3AF";
@@ -14,39 +15,52 @@ export default function TabsLayout() {
 
         tabBarStyle: {
           position: "absolute",
-
           left: 16,
           right: 16,
           bottom: 0,
 
-          height: 64,
-          borderRadius: 18,
+          ...(Platform.OS === "ios"
+            ? {
+                height: 80,
+                backgroundColor: "##dfdfdf",
+              }
+            : {
+                height: 65,
+                backgroundColor: "#dfdfdf",
+              }),
 
-          backgroundColor: "#ffffff",
+          borderRadius: 30,
+          paddingTop: 10,
 
           borderTopWidth: 0,
 
           ...(Platform.OS === "ios"
             ? {
                 shadowColor: "#000",
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.08,
-                shadowRadius: 16,
+                shadowOpacity: 0.18,
+                shadowRadius: 30,
+                shadowOffset: { width: 0, height: 12 },
               }
             : {
-                elevation: 10,
+                elevation: 14,
               }),
         },
 
         tabBarItemStyle: {
-          borderRadius: 18,
+          borderRadius: 40,
         },
+
+        tabBarBackground: () => (
+          <View style={StyleSheet.absoluteFill}>
+            <BlurView intensity={60} tint="light" style={styles.blur} />
+          </View>
+        ),
       }}
     >
       <Tabs.Screen
         name="swaps"
         options={{
-          tabBarIcon: ({ focused, size }) => (
+          tabBarIcon: ({ focused }) => (
             <Ionicons
               name={focused ? "swap-horizontal" : "swap-horizontal-outline"}
               size={22}
@@ -73,23 +87,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="add"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <Ionicons name="add" size={28} color={focused ? "#fff" : "#fff"} />
+          tabBarIcon: () => (
+            <View style={styles.centerButton}>
+              <Ionicons name="add" size={26} color="#fff" />
+            </View>
           ),
           tabBarItemStyle: {
-            marginTop: -22,
+            marginTop: 0,
           },
-          tabBarLabel: undefined,
-          tabBarActiveTintColor: "#fff",
-          tabBarInactiveTintColor: "#fff",
-          tabBarIconStyle: {
-            backgroundColor: "#111",
-            borderRadius: 999,
-            width: 48,
-            height: 48,
-            justifyContent: "center",
-            alignItems: "center",
-          } as any,
         }}
       />
 
@@ -121,3 +126,25 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  blur: {
+    flex: 1,
+    borderRadius: 22,
+    overflow: "hidden",
+  },
+
+  centerButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#111",
+    alignItems: "center",
+    justifyContent: "center",
+
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+  },
+});

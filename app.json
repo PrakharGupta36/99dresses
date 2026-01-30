@@ -10,7 +10,6 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.prakhar369.x99dresses"
     },
     "android": {
@@ -22,7 +21,6 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "googleServicesFile": "./google-services.json",
       "package": "com.prakhar369.x99dresses"
     },
     "web": {
@@ -43,8 +41,7 @@
           }
         }
       ],
-      "expo-web-browser",
-      "@react-native-google-signin/google-signin"
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

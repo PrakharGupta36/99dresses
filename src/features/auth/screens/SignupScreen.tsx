@@ -1,15 +1,17 @@
 import { useRouter } from "expo-router";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { signUpWithEmail } from "../../../services/auth/emailAuth";
+import { auth, db } from "../../../services/firebase";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -21,12 +23,32 @@ export default function SignupScreen() {
   const [error, setError] = useState<string | null>(null);
 
   async function onSignup() {
+    if (!name || !email || !password) {
+      setError("Please fill all fields");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
-      await signUpWithEmail(email.trim(), password, name.trim());
+      const res = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password,
+      );
 
+      const user = res.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        name: name.trim(),
+        email: user.email,
+        photo: null,
+        createdAt: serverTimestamp(),
+      });
+
+      // ✅ go straight to app
       router.replace("/(tabs)/swaps");
     } catch (e: any) {
       setError(e.message);
@@ -45,12 +67,13 @@ export default function SignupScreen() {
         <Text style={styles.brand}>99dresses</Text>
 
         <Text style={styles.title}>Create account</Text>
-        <Text style={styles.subtitle}>Join the swap community</Text>
+        <Text style={styles.subtitle}>Start swapping with people near you</Text>
 
         <View style={styles.form}>
           <TextInput
             placeholder="Full name"
             placeholderTextColor="#9CA3AF"
+            autoCapitalize="words"
             value={name}
             onChangeText={setName}
             style={styles.input}
@@ -60,6 +83,7 @@ export default function SignupScreen() {
             placeholder="Email"
             placeholderTextColor="#9CA3AF"
             autoCapitalize="none"
+            keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
             style={styles.input}
@@ -82,6 +106,7 @@ export default function SignupScreen() {
             style={({ pressed }) => [
               styles.button,
               pressed && { opacity: 0.9 },
+              loading && { opacity: 0.6 },
             ]}
           >
             <Text style={styles.buttonText}>
@@ -94,7 +119,7 @@ export default function SignupScreen() {
           <Pressable onPress={() => router.replace("/login")}>
             <Text style={styles.link}>
               Already have an account?{" "}
-              <Text style={styles.linkStrong}>Login</Text>
+              <Text style={styles.linkStrong}>Log in</Text>
             </Text>
           </Pressable>
         </View>

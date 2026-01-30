@@ -1,15 +1,16 @@
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  Pressable,
-  Image,
-  ScrollView,
   Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
 
 export default function Add() {
   const [image, setImage] = useState<string | null>(null);
@@ -19,9 +20,48 @@ export default function Add() {
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
 
+  const imageMediaType: any = (ImagePicker as any).MediaType?.Image
+    ? [(ImagePicker as any).MediaType.Image]
+    : (ImagePicker as any).MediaTypeOptions.Images;
+
+  // ---------------------------
+  // Permissions
+  // ---------------------------
+  async function ensurePermissions() {
+    const media = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const camera = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!media.granted || !camera.granted) {
+      Alert.alert(
+        "Permission required",
+        "Please allow camera and photo library access.",
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  // ---------------------------
+  // Pick entry point
+  // ---------------------------
   async function pickImage() {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    const ok = await ensurePermissions();
+    if (!ok) return;
+
+    Alert.alert("Add photo", "Choose source", [
+      { text: "Camera", onPress: openCamera },
+      { text: "Gallery", onPress: openGallery },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
+
+  // ---------------------------
+  // Camera
+  // ---------------------------
+  async function openCamera() {
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: imageMediaType,
       quality: 0.8,
       allowsEditing: true,
       aspect: [4, 5],
@@ -32,6 +72,25 @@ export default function Add() {
     }
   }
 
+  // ---------------------------
+  // Gallery
+  // ---------------------------
+  async function openGallery() {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: imageMediaType,
+      quality: 0.8,
+      allowsEditing: true,
+      aspect: [4, 5],
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  }
+
+  // ---------------------------
+  // Submit
+  // ---------------------------
   function submit() {
     if (!image || !title || !brand || !condition) {
       Alert.alert("Missing info", "Please complete all required fields.");
@@ -51,9 +110,22 @@ export default function Add() {
       <Text style={styles.header}>List an item</Text>
 
       {/* Image */}
-      <Pressable style={styles.imageBox} onPress={pickImage}>
+      <Pressable
+        style={styles.imageBox}
+        onPress={!image ? pickImage : undefined}
+      >
         {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
+          <>
+            <Image source={{ uri: image }} style={styles.image} />
+
+            <Pressable
+              style={styles.removeButton}
+              onPress={() => setImage(null)}
+              hitSlop={10}
+            >
+              <Ionicons name="close" size={16} color="#111" />
+            </Pressable>
+          </>
         ) : (
           <Text style={styles.imageHint}>Tap to add photo</Text>
         )}
@@ -183,5 +255,24 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 15,
+  },
+
+  removeButton: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    alignItems: "center",
+    justifyContent: "center",
+
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+
+    elevation: 6,
   },
 });

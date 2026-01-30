@@ -43,9 +43,7 @@ export default function Feed() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Community feed</Text>
-        <Text style={styles.subtitle}>
-          New drops from people near you
-        </Text>
+        <Text style={styles.subtitle}>New drops from people near you</Text>
       </View>
 
       <FlatList

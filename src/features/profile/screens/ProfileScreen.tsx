@@ -1,14 +1,16 @@
+import { useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
 import {
-  View,
-  Text,
-  StyleSheet,
+  ActivityIndicator,
+  Alert,
   Image,
   Pressable,
-  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-import { signOut } from "firebase/auth";
-import { auth } from "../../../services/firebase";
-import { useRouter } from "expo-router";
+import { auth, db } from "../../../services/firebase";
 import { useUserProfile } from "../hooks/useUserProfile";
 
 export default function ProfileScreen() {
@@ -18,6 +20,30 @@ export default function ProfileScreen() {
   async function logout() {
     await signOut(auth);
     router.replace("/login");
+  }
+
+  async function editProfile() {
+    if (!profile) return;
+
+    Alert.prompt(
+      "Edit name",
+      "Enter your new name",
+      async (value) => {
+        if (!value || !value.trim()) return;
+
+        try {
+          const ref = doc(db, "users", profile.uid);
+
+          await updateDoc(ref, {
+            name: value.trim(),
+          });
+        } catch (e) {
+          Alert.alert("Update failed");
+        }
+      },
+      "plain-text",
+      profile.name,
+    );
   }
 
   if (loading) {
@@ -57,8 +83,7 @@ export default function ProfileScreen() {
         <Text style={styles.name}>{profile.name}</Text>
         <Text style={styles.email}>{profile.email}</Text>
 
-        {/* Edit profile (future action) */}
-        <Pressable style={styles.editButton}>
+        <Pressable style={styles.editButton} onPress={editProfile}>
           <Text style={styles.editText}>Edit profile</Text>
         </Pressable>
       </View>

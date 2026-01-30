@@ -19,7 +19,6 @@ export function useUserProfile() {
     let unsubscribeDoc: (() => void) | null = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      // cleanup old listener when user changes
       if (unsubscribeDoc) {
         unsubscribeDoc();
         unsubscribeDoc = null;
@@ -35,15 +34,29 @@ export function useUserProfile() {
 
       const ref = doc(db, "users", user.uid);
 
-      unsubscribeDoc = onSnapshot(ref, (snap) => {
-        if (snap.exists()) {
-          setProfile(snap.data() as UserProfile);
-        } else {
-          setProfile(null);
-        }
+      unsubscribeDoc = onSnapshot(
+        ref,
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data();
 
-        setLoading(false);
-      });
+            setProfile({
+              uid: user.uid,     // ✅ VERY IMPORTANT
+              name: data.name,
+              email: data.email,
+              photo: data.photo ?? null,
+              createdAt: data.createdAt,
+            });
+          } else {
+            setProfile(null);
+          }
+
+          setLoading(false);
+        },
+        () => {
+          setLoading(false);
+        }
+      );
     });
 
     return () => {
