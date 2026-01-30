@@ -34,13 +34,17 @@ Only fair, transparent swaps.
 
 ## 🖼️ Key Screens
 
-- Smart Swaps feed
-- Swap comparison (side-by-side)
-- Pending / accepted swaps
-- Swap chat
-- Item upload
+<p align="center">
+  <img src="./assets/readme/01.png" width="280" />
+  <img src="./assets/readme/02.png" width="280" />
+  <img src="./assets/readme/03.png" width="280" />
+</p>
 
-*(UI is intentionally minimal and premium — inspired by urban fashion brands.)*
+<p align="center">
+  <strong>Smart Swaps feed</strong> &nbsp;•&nbsp;
+  <strong>Swap detail & request</strong> &nbsp;•&nbsp;
+  <strong>Create listing</strong>
+</p>
 
 ---
 
@@ -75,36 +79,4 @@ They cannot be withdrawn or converted to money.
 ## 🧱 Frontend Architecture
 
 This project follows a feature-driven and domain-layered structure.
-```
-app/ → routing (expo-router)
-src/features/ → product features (swap, item, chat, feed, profile)
-src/domain/ → models and business logic
-src/services/ → mock APIs and data sources
-src/store/ → global state (Zustand)
-src/components/ → reusable UI
-src/theme/ → design tokens
-```
 
-The goal is to keep UI, domain logic, and data access clearly separated.
-
----
-
-## ⚙️ Tech Stack
-
-- Expo
-- React Native
-- TypeScript
-- expo-router
-- Zustand
-- React Native Reanimated
-- Gesture Handler
-
----
-
-## 🚀 Getting Started
-```bash
-git clone <your-repo-url>
-cd 99dresses
-npm install
-npx expo start
-```
