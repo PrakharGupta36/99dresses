@@ -1,10 +1,11 @@
+import { useRouter } from "expo-router";
 import {
-  View,
-  Text,
-  StyleSheet,
   FlatList,
   Image,
   Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 const MOCK_SWAPS = [
@@ -35,6 +36,8 @@ const MOCK_SWAPS = [
 ];
 
 export default function Swaps() {
+  const router = useRouter();
+
   return (
     <View style={styles.root}>
       {/* Header */}
@@ -49,7 +52,10 @@ export default function Swaps() {
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <Pressable style={styles.card}>
+          <Pressable
+            style={styles.card}
+            onPress={() => router.push(`../swap/${item.id}`)}
+          >
             <Image source={{ uri: item.image }} style={styles.image} />
 
             <View style={styles.cardBody}>

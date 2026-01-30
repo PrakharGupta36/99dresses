@@ -19,16 +19,22 @@ const PAGES = [
     title: "Trade clothes, not money",
     subtitle:
       "Exchange fashion pieces with people near you. Fair, fast and transparent swaps.",
+    image:
+      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1080&q=80",
   },
   {
     title: "Smart swaps",
     subtitle:
       "We intelligently match your clothes with nearby users based on style, size and value.",
+    image:
+      "https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=1080&q=80",
   },
   {
     title: "Sustainable by design",
     subtitle:
       "Refresh your wardrobe without buying more — and help reduce fashion waste.",
+    image:
+      "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=1080&q=80",
   },
 ];
 
@@ -43,7 +49,7 @@ export default function Onboarding() {
     router.replace("/login");
   };
 
-  const onNext = async () => {
+  const onNext = () => {
     if (page < PAGES.length - 1) {
       listRef.current?.scrollToIndex({
         index: page + 1,
@@ -56,7 +62,7 @@ export default function Onboarding() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar hidden />
 
       {/* Skip */}
       <Pressable onPress={finish} style={styles.skip}>
@@ -88,20 +94,29 @@ export default function Onboarding() {
 
           const translateY = scrollX.interpolate({
             inputRange,
-            outputRange: [30, 0, 30],
+            outputRange: [40, 0, 40],
+            extrapolate: "clamp",
           });
 
           const opacity = scrollX.interpolate({
             inputRange,
-            outputRange: [0.3, 1, 0.3],
+            outputRange: [0.5, 1, 0.5],
+            extrapolate: "clamp",
           });
 
           return (
             <View style={[styles.page, { width }]}>
-              {/* Visual block */}
               <View style={styles.hero}>
-                <View style={styles.fakeCard} />
-                <View style={[styles.fakeCard, styles.fakeCardOffset]} />
+                <Animated.Image
+                  source={{ uri: item.image }}
+                  style={[
+                    styles.image,
+                    {
+                      transform: [{ translateY }],
+                      opacity,
+                    },
+                  ]}
+                />
               </View>
 
               <Animated.View
@@ -129,7 +144,7 @@ export default function Onboarding() {
 
             const scale = scrollX.interpolate({
               inputRange,
-              outputRange: [1, 1.8, 1],
+              outputRange: [1, 2.2, 1],
               extrapolate: "clamp",
             });
 
@@ -190,23 +205,24 @@ const styles = StyleSheet.create({
   },
 
   hero: {
-    height: 260,
+    height: 320,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 36,
   },
 
-  fakeCard: {
-    position: "absolute",
-    width: 180,
-    height: 240,
-    borderRadius: 24,
+  image: {
+    width: width * 0.72,
+    height: 280,
+    borderRadius: 28,
     backgroundColor: "#F3F4F6",
-  },
 
-  fakeCardOffset: {
-    transform: [{ rotate: "-6deg" }, { translateX: -18 }],
-    backgroundColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 12 },
+
+    elevation: 10,
   },
 
   textBlock: {

@@ -1,14 +1,14 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { signUpWithEmail } from "../../../services/auth/emailAuth";
 
 export default function SignupScreen() {
@@ -97,7 +97,6 @@ export default function SignupScreen() {
               <Text style={styles.linkStrong}>Login</Text>
             </Text>
           </Pressable>
-          
         </View>
       </View>
     </KeyboardAvoidingView>
