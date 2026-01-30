@@ -24,9 +24,6 @@ export default function Add() {
     ? [(ImagePicker as any).MediaType.Image]
     : (ImagePicker as any).MediaTypeOptions.Images;
 
-  // ---------------------------
-  // Permissions
-  // ---------------------------
   async function ensurePermissions() {
     const media = await ImagePicker.requestMediaLibraryPermissionsAsync();
     const camera = await ImagePicker.requestCameraPermissionsAsync();
@@ -42,9 +39,6 @@ export default function Add() {
     return true;
   }
 
-  // ---------------------------
-  // Pick entry point
-  // ---------------------------
   async function pickImage() {
     const ok = await ensurePermissions();
     if (!ok) return;
@@ -56,9 +50,6 @@ export default function Add() {
     ]);
   }
 
-  // ---------------------------
-  // Camera
-  // ---------------------------
   async function openCamera() {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: imageMediaType,
@@ -72,9 +63,6 @@ export default function Add() {
     }
   }
 
-  // ---------------------------
-  // Gallery
-  // ---------------------------
   async function openGallery() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: imageMediaType,
@@ -88,26 +76,24 @@ export default function Add() {
     }
   }
 
-  // ---------------------------
-  // Submit
-  // ---------------------------
   function submit() {
     if (!image || !title || !brand || !condition) {
       Alert.alert("Missing info", "Please complete all required fields.");
       return;
     }
 
-    // Later: upload to Firebase + create document
     Alert.alert("Item added", "Your item is ready for swaps.");
   }
 
   return (
     <ScrollView
       style={styles.root}
-      contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingBottom: 200, // ✅ important – clears the floating tab bar
+      }}
     >
-      <Text style={styles.header}>List an item</Text>
+      <Text style={styles.header}>Create listing</Text>
 
       {/* Image */}
       <Pressable
@@ -127,7 +113,10 @@ export default function Add() {
             </Pressable>
           </>
         ) : (
-          <Text style={styles.imageHint}>Tap to add photo</Text>
+          <View style={styles.imagePlaceholder}>
+            <Ionicons name="camera-outline" size={28} color="#9CA3AF" />
+            <Text style={styles.imageHint}>Add cover photo</Text>
+          </View>
         )}
       </Pressable>
 
@@ -176,6 +165,7 @@ export default function Add() {
         />
       </View>
 
+      {/* Submit – inline, not floating */}
       <Pressable style={styles.submit} onPress={submit}>
         <Text style={styles.submitText}>Publish item</Text>
       </Pressable>
@@ -201,10 +191,8 @@ const styles = StyleSheet.create({
 
   imageBox: {
     height: 280,
-    borderRadius: 22,
+    borderRadius: 26,
     backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
     overflow: "hidden",
     marginBottom: 24,
   },
@@ -212,6 +200,13 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+  },
+
+  imagePlaceholder: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
 
   imageHint: {
@@ -232,35 +227,37 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     fontSize: 15,
     backgroundColor: "#fff",
   },
 
   textarea: {
-    minHeight: 100,
+    minHeight: 110,
     textAlignVertical: "top",
   },
 
   submit: {
-    marginTop: 24,
+    marginTop: 28,
+    height: 56,
     backgroundColor: "#111",
-    paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 18,
     alignItems: "center",
+    justifyContent: "center",
   },
 
   submitText: {
     color: "#fff",
     fontWeight: "600",
     fontSize: 15,
+    letterSpacing: 0.2,
   },
 
   removeButton: {
     position: "absolute",
-    top: 10,
-    left: 10,
+    top: 12,
+    left: 12,
     width: 28,
     height: 28,
     borderRadius: 14,
@@ -272,7 +269,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
-
     elevation: 6,
   },
 });
